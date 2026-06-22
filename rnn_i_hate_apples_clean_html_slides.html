@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RNN Matrix Dry Run - I hate apples</title>
+<style>
+  :root { --bg: #111827; --paper: #ffffff; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: #172033;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .note {
+    max-width: 1600px;
+    margin: 18px auto 0;
+    color: #d1d5db;
+    font: 18px/1.4 Arial, Helvetica, sans-serif;
+    padding: 0 16px;
+  }
+  .slide {
+    width: min(96vw, 1600px);
+    aspect-ratio: 16 / 9;
+    display: block;
+    margin: 24px auto 42px;
+    background: var(--paper);
+    box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    border-radius: 16px;
+  }
+  @media print {
+    body { background: white; }
+    .note { display: none; }
+    .slide {
+      width: 100vw;
+      height: 56.25vw;
+      margin: 0;
+      box-shadow: none;
+      border-radius: 0;
+      page-break-after: always;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="note">Clean SVG-based HTML slides. Scroll down or print to PDF; all text is fixed inside the 16:9 frame.</div>
+
+<!-- SLIDE 1 -->
+<svg class="slide" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN overview">
+  <defs>
+    <marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#455366"/></marker>
+  </defs>
+  <rect x="0" y="0" width="1600" height="900" rx="0" fill="#ffffff"/>
+  <text x="80" y="72" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" fill="#172033">RNN Matrix Dry Run: “I hate apples”</text>
+  <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#627083">Small RNN(2) example. Same logic applies to RNN(32), RNN(64), etc.</text>
+
+  <rect x="80" y="150" width="1440" height="110" rx="22" fill="#fff8e7" stroke="#e6c66d" stroke-width="3"/>
+  <text x="800" y="198" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#172033">hₜ = tanh( Wₓxₜ + Wₕhₜ₋₁ + b )</text>
+  <text x="800" y="235" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#627083">current word effect + previous memory effect → new hidden state</text>
+
+  <rect x="80" y="300" width="690" height="470" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="112" y="352" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">1) Word-by-word recurrence</text>
+  <text x="112" y="388" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">The same RNN cell and same weights are reused at every time step.</text>
+
+  <rect x="150" y="460" width="120" height="46" rx="18" fill="#fff1e3" stroke="#e8802d" stroke-width="2"/>
+  <text x="210" y="490" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#172033">x₁: I</text>
+  <rect x="340" y="460" width="132" height="46" rx="18" fill="#fff1e3" stroke="#e8802d" stroke-width="2"/>
+  <text x="406" y="490" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#172033">x₂: hate</text>
+  <rect x="545" y="460" width="156" height="46" rx="18" fill="#fff1e3" stroke="#e8802d" stroke-width="2"/>
+  <text x="623" y="490" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#172033">x₃: apples</text>
+
+  <line x1="210" y1="506" x2="210" y2="545" stroke="#e8802d" stroke-width="4" marker-end="url(#arrow1)"/>
+  <line x1="406" y1="506" x2="406" y2="545" stroke="#e8802d" stroke-width="4" marker-end="url(#arrow1)"/>
+  <line x1="623" y1="506" x2="623" y2="545" stroke="#e8802d" stroke-width="4" marker-end="url(#arrow1)"/>
+
+  <text x="108" y="615" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#3470cc">h₀</text>
+  <line x1="145" y1="607" x2="164" y2="607" stroke="#455366" stroke-width="4" marker-end="url(#arrow1)"/>
+
+  <g>
+    <rect x="165" y="545" width="90" height="125" rx="18" fill="#ffffff" stroke="#3470cc" stroke-width="3"/>
+    <text x="210" y="587" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#3470cc">RNN</text>
+    <circle cx="195" cy="632" r="7" fill="#e8802d"/><circle cx="225" cy="632" r="7" fill="#e8802d"/>
+    <text x="210" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#3470cc">h₁</text>
+  </g>
+  <line x1="255" y1="607" x2="356" y2="607" stroke="#455366" stroke-width="4" marker-end="url(#arrow1)"/>
+  <g>
+    <rect x="360" y="545" width="90" height="125" rx="18" fill="#ffffff" stroke="#3470cc" stroke-width="3"/>
+    <text x="405" y="587" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#3470cc">RNN</text>
+    <circle cx="390" cy="632" r="7" fill="#e8802d"/><circle cx="420" cy="632" r="7" fill="#e8802d"/>
+    <text x="405" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#3470cc">h₂</text>
+  </g>
+  <line x1="450" y1="607" x2="570" y2="607" stroke="#455366" stroke-width="4" marker-end="url(#arrow1)"/>
+  <g>
+    <rect x="575" y="545" width="90" height="125" rx="18" fill="#ffffff" stroke="#3470cc" stroke-width="3"/>
+    <text x="620" y="587" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#3470cc">RNN</text>
+    <circle cx="605" cy="632" r="7" fill="#e8802d"/><circle cx="635" cy="632" r="7" fill="#e8802d"/>
+    <text x="620" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#3470cc">h₃</text>
+  </g>
+
+  <rect x="830" y="300" width="690" height="470" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="862" y="352" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">2) Shapes used in this dry run</text>
+  <text x="862" y="388" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">We use tiny vectors so the matrix math fits cleanly.</text>
+
+  <rect x="880" y="430" width="595" height="66" rx="16" fill="#e8f2ff" stroke="#3470cc" stroke-width="2"/>
+  <text x="910" y="472" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">input size = 3</text>
+  <text x="1180" y="472" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">hidden size = 2</text>
+
+  <text x="900" y="545" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">xₜ shape:</text>
+  <text x="1080" y="545" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">3×1</text>
+  <text x="900" y="592" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">hₜ shape:</text>
+  <text x="1080" y="592" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">2×1</text>
+  <text x="900" y="639" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">Wₓ shape:</text>
+  <text x="1080" y="639" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">2×3</text>
+  <text x="900" y="686" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">Wₕ shape:</text>
+  <text x="1080" y="686" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">2×2</text>
+</svg>
+
+<!-- SLIDE 2 -->
+<svg class="slide" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN setup matrices">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="80" y="72" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#172033">Setup: Inputs and Trainable Weights</text>
+  <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#627083">These weights are shared across all time steps: t1, t2, and t3.</text>
+
+  <rect x="80" y="160" width="440" height="600" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="118" y="215" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">Input vectors</text>
+  <text x="118" y="275" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">x₁ = “I”</text>
+  <text x="188" y="316" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#e8802d">[1, 0, 0]ᵀ</text>
+  <text x="118" y="385" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">x₂ = “hate”</text>
+  <text x="188" y="426" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#e8802d">[0, 1, 0]ᵀ</text>
+  <text x="118" y="495" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">x₃ = “apples”</text>
+  <text x="188" y="536" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#e8802d">[0, 0, 1]ᵀ</text>
+  <rect x="118" y="610" width="360" height="92" rx="18" fill="#fff1e3" stroke="#e8802d" stroke-width="2"/>
+  <text x="298" y="648" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#172033">One-hot input</text>
+  <text x="298" y="680" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#627083">selects one column of Wₓ</text>
+
+  <rect x="570" y="160" width="460" height="600" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="608" y="215" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">Input weights Wₓ</text>
+  <text x="608" y="258" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">shape = 2×3</text>
+  <text x="675" y="325" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#627083">I        hate    apples</text>
+  <text x="645" y="383" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#172033">[ 0.2   -1.0    0.1 ]</text>
+  <text x="645" y="437" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#172033">[ 0.1   -0.8    0.4 ]</text>
+  <rect x="625" y="525" width="350" height="128" rx="18" fill="#e8f2ff" stroke="#3470cc" stroke-width="2"/>
+  <text x="800" y="566" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#172033">Wₓ maps input → hidden</text>
+  <text x="800" y="605" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#172033">(2×3)(3×1) = 2×1</text>
+
+  <rect x="1080" y="160" width="440" height="600" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="1118" y="215" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">Recurrent weights Wₕ</text>
+  <text x="1118" y="258" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">shape = 2×2</text>
+  <text x="1162" y="365" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#172033">[ 0.5    0.1 ]</text>
+  <text x="1162" y="427" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#172033">[ 0.2    0.4 ]</text>
+  <rect x="1130" y="525" width="340" height="128" rx="18" fill="#eaf9ee" stroke="#439d5b" stroke-width="2"/>
+  <text x="1300" y="566" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#172033">Wₕ maps old h → new h</text>
+  <text x="1300" y="605" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#172033">(2×2)(2×1) = 2×1</text>
+
+  <rect x="80" y="795" width="1440" height="54" rx="18" fill="#fff8e7" stroke="#e6c66d" stroke-width="2"/>
+  <text x="800" y="830" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#172033">Important: Wₓ and Wₕ are trainable, but they do not change during t1 → t2 → t3. They update after loss + backpropagation.</text>
+</svg>
+
+<!-- SLIDE 3 -->
+<svg class="slide" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN time step 1">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="80" y="72" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#172033">Time Step 1: word = “I”</text>
+  <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#627083">Initial memory is zero: h₀ = [0, 0]ᵀ</text>
+
+  <rect x="80" y="155" width="1440" height="94" rx="22" fill="#fff8e7" stroke="#e6c66d" stroke-width="3"/>
+  <text x="800" y="214" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#172033">h₁ = tanh( Wₓx₁ + Wₕh₀ + b )</text>
+
+  <rect x="80" y="295" width="430" height="360" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="120" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Current word effect</text>
+  <text x="120" y="410" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">x₁ = [1, 0, 0]ᵀ</text>
+  <text x="120" y="470" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#e8802d">Wₓx₁ = [0.2, 0.1]ᵀ</text>
+  <text x="120" y="545" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">Because one-hot x₁ selects the</text>
+  <text x="120" y="575" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">first column of Wₓ.</text>
+
+  <rect x="585" y="295" width="430" height="360" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="625" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Previous memory effect</text>
+  <text x="625" y="410" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">h₀ = [0, 0]ᵀ</text>
+  <text x="625" y="470" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#3470cc">Wₕh₀ = [0, 0]ᵀ</text>
+  <text x="625" y="545" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">No previous information exists yet.</text>
+
+  <rect x="1090" y="295" width="430" height="360" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="1130" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Add and apply tanh</text>
+  <text x="1130" y="410" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">sum = [0.2, 0.1]ᵀ</text>
+  <text x="1130" y="470" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">h₁ = tanh(sum)</text>
+  <text x="1130" y="535" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#439d5b">h₁ ≈ [0.197, 0.100]ᵀ</text>
+
+  <rect x="160" y="720" width="1280" height="82" rx="24" fill="#eaf9ee" stroke="#439d5b" stroke-width="2"/>
+  <text x="800" y="772" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">Meaning: after reading “I”, the RNN has a small 2-value hidden memory.</text>
+</svg>
+
+<!-- SLIDE 4 -->
+<svg class="slide" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN time step 2">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="80" y="72" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#172033">Time Step 2: word = “hate”</text>
+  <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#627083">Now the RNN uses the current word plus previous hidden state h₁.</text>
+
+  <rect x="80" y="155" width="1440" height="94" rx="22" fill="#fff8e7" stroke="#e6c66d" stroke-width="3"/>
+  <text x="800" y="214" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#172033">h₂ = tanh( Wₓx₂ + Wₕh₁ + b )</text>
+
+  <rect x="80" y="295" width="430" height="400" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="120" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Current word effect</text>
+  <text x="120" y="410" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">x₂ = [0, 1, 0]ᵀ</text>
+  <text x="120" y="470" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#e8802d">Wₓx₂ = [-1.0, -0.8]ᵀ</text>
+  <text x="120" y="545" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">One-hot x₂ selects the second</text>
+  <text x="120" y="575" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">column of Wₓ: the “hate” column.</text>
+
+  <rect x="585" y="295" width="430" height="400" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="625" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Previous memory effect</text>
+  <text x="625" y="410" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">h₁ ≈ [0.197, 0.100]ᵀ</text>
+  <text x="625" y="472" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">row 1: 0.5(0.197)+0.1(0.100)</text>
+  <text x="720" y="508" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">= 0.1085</text>
+  <text x="625" y="560" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">row 2: 0.2(0.197)+0.4(0.100)</text>
+  <text x="720" y="596" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">= 0.0794</text>
+  <text x="625" y="650" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#3470cc">Wₕh₁ = [0.1085, 0.0794]ᵀ</text>
+
+  <rect x="1090" y="295" width="430" height="400" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="1130" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Add and apply tanh</text>
+  <text x="1130" y="410" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">sum = [-0.8915, -0.7206]ᵀ</text>
+  <text x="1130" y="470" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">h₂ = tanh(sum)</text>
+  <text x="1130" y="535" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#c44646">h₂ ≈ [-0.712, -0.617]ᵀ</text>
+  <text x="1130" y="608" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">The word “hate” strongly pushes</text>
+  <text x="1130" y="638" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">the hidden memory negative.</text>
+
+  <rect x="160" y="745" width="1280" height="82" rx="24" fill="#ffeded" stroke="#c44646" stroke-width="2"/>
+  <text x="800" y="797" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">Meaning: after “I hate”, the hidden state stores strong negative sentiment.</text>
+</svg>
+
+<!-- SLIDE 5 -->
+<svg class="slide" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN time step 3 and output">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="80" y="72" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#172033">Time Step 3: word = “apples” + Final Output</text>
+  <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#627083">The final hidden state h₃ is used for sentiment classification.</text>
+
+  <rect x="80" y="155" width="1440" height="94" rx="22" fill="#fff8e7" stroke="#e6c66d" stroke-width="3"/>
+  <text x="800" y="214" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#172033">h₃ = tanh( Wₓx₃ + Wₕh₂ + b )</text>
+
+  <rect x="80" y="295" width="430" height="365" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="120" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Current word effect</text>
+  <text x="120" y="410" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#172033">x₃ = [0, 0, 1]ᵀ</text>
+  <text x="120" y="470" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#e8802d">Wₓx₃ = [0.1, 0.4]ᵀ</text>
+  <text x="120" y="545" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">This selects the “apples” column</text>
+  <text x="120" y="575" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">from Wₓ.</text>
+
+  <rect x="585" y="295" width="430" height="365" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="625" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Previous memory effect</text>
+  <text x="625" y="410" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">h₂ ≈ [-0.712, -0.617]ᵀ</text>
+  <text x="625" y="472" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">row 1 = -0.4177</text>
+  <text x="625" y="520" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">row 2 = -0.3892</text>
+  <text x="625" y="585" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#3470cc">Wₕh₂ = [-0.4177, -0.3892]ᵀ</text>
+
+  <rect x="1090" y="295" width="430" height="365" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="1130" y="350" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#172033">Add and apply tanh</text>
+  <text x="1130" y="410" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">sum = [-0.3177, 0.0108]ᵀ</text>
+  <text x="1130" y="470" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">h₃ = tanh(sum)</text>
+  <text x="1130" y="535" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#7358be">h₃ ≈ [-0.307, 0.011]ᵀ</text>
+
+  <rect x="160" y="715" width="1280" height="112" rx="26" fill="#f2eeff" stroke="#7358be" stroke-width="2"/>
+  <text x="210" y="760" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#172033">Final classifier:</text>
+  <text x="455" y="760" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#172033">h₃ → Dense/Softmax → Positive ≈ 0.234, Negative ≈ 0.766</text>
+  <text x="800" y="805" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#c44646">Prediction: NEGATIVE</text>
+</svg>
+
+<!-- SLIDE 6 -->
+<svg class="slide" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RNN trainable parameters">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="80" y="72" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#172033">Which Parts Are Trainable?</text>
+  <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#627083">Weights are learned. Hidden states are computed during the forward pass.</text>
+
+  <rect x="80" y="160" width="455" height="555" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="118" y="215" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">Trainable parameters</text>
+  <text x="118" y="285" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#e8802d">Wₓ</text>
+  <text x="178" y="285" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">input weights</text>
+  <text x="118" y="355" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#3470cc">Wₕ</text>
+  <text x="178" y="355" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">recurrent weights</text>
+  <text x="118" y="425" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#439d5b">b</text>
+  <text x="178" y="425" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">RNN bias</text>
+  <text x="118" y="495" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#7358be">Wᵧ, bᵧ</text>
+  <text x="240" y="495" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">output layer</text>
+  <rect x="118" y="575" width="365" height="76" rx="18" fill="#eaf9ee" stroke="#439d5b" stroke-width="2"/>
+  <text x="300" y="623" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#172033">These change during training.</text>
+
+  <rect x="575" y="160" width="455" height="555" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="613" y="215" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">Not trainable parameters</text>
+  <text x="613" y="285" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#3470cc">h₁, h₂, h₃</text>
+  <text x="613" y="327" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">hidden states / activations</text>
+  <text x="613" y="405" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">They are calculated from:</text>
+  <text x="655" y="465" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">xₜ, hₜ₋₁, Wₓ, Wₕ, b</text>
+  <rect x="613" y="575" width="365" height="76" rx="18" fill="#e8f2ff" stroke="#3470cc" stroke-width="2"/>
+  <text x="795" y="623" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#172033">These change for each input.</text>
+
+  <rect x="1070" y="160" width="450" height="555" rx="26" fill="#f7f9fc" stroke="#cdd6e1" stroke-width="2"/>
+  <text x="1108" y="215" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#172033">When do weights update?</text>
+  <text x="1108" y="280" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">1. Forward pass</text>
+  <text x="1145" y="318" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#627083">x₁ → h₁ → h₂ → h₃ → prediction</text>
+  <text x="1108" y="380" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">2. Compute loss</text>
+  <text x="1108" y="455" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">3. Backpropagation through time</text>
+  <text x="1108" y="530" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#172033">4. Optimizer updates weights</text>
+  <rect x="1108" y="610" width="360" height="76" rx="18" fill="#ffeded" stroke="#c44646" stroke-width="2"/>
+  <text x="1288" y="648" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#172033">Not after each hidden state.</text>
+  <text x="1288" y="676" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#627083">Usually after each batch.</text>
+
+  <rect x="80" y="775" width="1440" height="66" rx="20" fill="#fff8e7" stroke="#e6c66d" stroke-width="2"/>
+  <text x="800" y="817" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#172033">Compile prepares the optimizer/loss; fit() performs training and updates Wₓ, Wₕ, b.</text>
+</svg>
+
+</body>
+</html>
